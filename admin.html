@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel — Maxscotas Petshop</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔐</text></svg>">
+<style>
+:root{--bg:#f4f1ec;--card:#fff;--text:#33241a;--muted:#8a7563;--accent:#e0533a;--green:#21a57d;--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,Arial,sans-serif;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:24px 16px 70px}
+h1{font-size:24px;display:flex;align-items:center;gap:10px}
+.sub{color:var(--muted);font-size:13.5px;margin:4px 0 20px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:0 3px 14px rgba(60,40,20,.08);padding:18px;margin-bottom:16px;border:1px solid rgba(60,40,20,.05)}
+.card h2{font-size:15px;margin-bottom:14px;text-transform:uppercase;letter-spacing:.8px;color:#5b4634;display:flex;justify-content:space-between;align-items:center}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:3px}
+input,textarea,select{width:100%;padding:9px 11px;border:1px solid #ddd;border-radius:9px;font-size:14px;font-family:inherit;background:#fbfaf8}
+textarea{min-height:44px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid #ffb39a;border-color:transparent}
+.item{border:1px solid #eee;border-radius:11px;padding:12px;margin-bottom:10px;background:#fcfbf9}
+.item h3{font-size:13px;color:var(--muted);margin-bottom:8px;font-weight:600}
+.smallrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px}
+.smallrow2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.btnrow{display:flex;gap:8px;align-items:center;margin-top:10px}
+button{border:none;border-radius:9px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-add{background:#22c97e;color:#fff}
+.btn-del{background:#fdecea;color:#c0392b;padding:8px 12px;font-size:13px}
+.btn-save{background:var(--accent);color:#fff;font-size:16px;padding:14px;width:100%;box-shadow:0 4px 14px rgba(224,83,58,.3)}
+.btn-ghost{background:#eee;color:#5b4634}
+.btn-ok{background:var(--green);color:#fff}
+.right{display:flex;gap:8px}
+/* login */
+#login{max-width:380px;margin:80px auto 0;text-align:center}
+#login .lock{font-size:50px;display:block;margin-bottom:10px}
+#login input{margin:14px 0 10px;text-align:center;font-size:18px;padding:12px}
+#login .err{color:#c0392b;font-size:13px;min-height:18px;margin-top:6px}
+.toggle{display:flex;gap:8px;margin-bottom:8px}
+.toggle button{flex:1;background:#f0ede8;color:var(--muted)}
+.toggle button.on{background:var(--green);color:#fff}
+.hide{display:none!important}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:#223;color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:600;transition:all .3s;opacity:0;z-index:50}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.nota{font-size:12px;color:var(--muted);background:#f7f3ea;border-radius:9px;padding:9px 12px;margin-top:12px;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- LOGIN -->
+  <div id="login">
+    <span class="lock">🔐</span>
+    <h1>Panel Maxscotas</h1>
+    <p class="sub">Ingresá la contraseña para administrar el sitio.</p>
+    <input type="password" id="pass" placeholder="Contraseña" autocomplete="current-password">
+    <button class="btn-save" id="btn-login" style="width:auto;padding:12px 30px">Entrar</button>
+    <div class="err" id="login-err"></div>
+    <p class="nota">No recordás la contraseña? Pedile al desarrollador que te la reenvié.</p>
+  </div>
+
+  <!-- PANEL -->
+  <div id="panel" class="hide">
+    <h1>🐱 Panel Maxscotas</h1>
+    <p class="sub">Todo lo que edites acá se guarda en este navegador y se muestra en tu página. <b>Hacé respaldo seguido con el botón "Exportar".</b></p>
+
+    <div class="card">
+      <h2>⚙️ Datos principales</h2>
+      <div class="row">
+        <div><label>Nombre del negocio</label><input id="f-nombre"></div>
+        <div><label>Emoji del logo</label><input id="f-avatar" maxlength="8"></div>
+      </div>
+      <div><label>Frase de presentación</label><input id="f-tagline"></div>
+      <div class="row3" id="badges"></div>
+    </div>
+
+    <div class="card">
+      <h2>🔥 Promoción principal <span class="toggle" id="promo-toggle"></span></h2>
+      <div class="row">
+        <div><label>Título de la promo</label><input id="f-promo-titulo"></div>
+        <div><label>Texto</label><input id="f-promo-texto"></div>
+      </div>
+      <div><label>Frase destacada (grande)</label><input id="f-promo-big"></div>
+    </div>
+
+    <div class="card">
+      <h2>🛒 Catálogo de productos <span class="right"><button class="btn-add" id="btn-add-prod">+ Agregar</button></span></h2>
+      <div id="prod-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>🛍️ Botones "Comprá ahora" <span class="right"><button class="btn-add" id="btn-add-comp">+ Agregar</button></span></h2>
+      <div id="comp-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>📱 Redes sociales y contacto <span class="right"><button class="btn-add" id="btn-add-soc">+ Agregar</button></span></h2>
+      <div id="soc-list"></div>
+    </div>
+
+    <div class="card">
+      <h2>🗄️ Pie de página y respaldo</h2>
+      <div><label>Texto del pie de página</label><input id="f-footer"></div>
+      <div class="btnrow" style="margin-top:12px">
+        <button class="btn-ok" id="btn-save">💾 Guardar cambios</button>
+        <button class="btn-ghost" id="btn-export">⬇️ Exportar respaldo</button>
+        <button class="btn-ghost" id="btn-import">⬆️ Importar respaldo</button>
+        <button class="btn-ghost" id="btn-pass" title="Cambiar contraseña">🔑 Clave</button>
+      </div>
+      <input type="file" id="file-import" accept=".json" class="hide">
+      <p class="nota">💡 Consejo: cada 2-3 semanas exportá un respaldo y guardalo en tu compu o celular. Si perdés datos, lo importás acá y listo.</p>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const LS_KEY='msp_data_v2';
+const PASS_KEY='msp_pass_v2';
+const DEFAULT_PASS='petshop2026';
+const icMap={wa:'💬',ig:'📸',fb:'👍',tk:'🎵',ml:'',mail:'✉️',web:'🛒',sh:'🛍️',rosa:'🧡',celeste:'💙',verde:'💚',naranja:'🧡',dorado:'⭐'};
+const COLORS=['wa','ig','fb','tk','ml','mail','web','sh','rosa','celeste','verde','naranja','dorado'];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+
+const DEFAULT={
+  nombre:'Maxscotas Petshop',avatar:'🐾',
+  tagline:'Encontrá todo lo que buscás para tu mascota. Estamos para ayudarte 🧡',
+  badges:['🐕 Alimentos balanceados','🚚 Envíos a CABA y GBA','💵 10% OFF en efectivo'],
+  promo:{activa:true,titulo:'🔥 Envío gratis EN EL DÍA',texto:'En CABA a partir de $29.000. También vendemos por MercadoLibre y tienda online.',big:'PAGÁ CON CRÉDITO / DÉBITO O EFECTIVO'},
+  productos:[
+    {emoji:'🐶',titulo:'Alimentos balanceados',desc:'Las mejores marcas de alimento para perros y gatos.',precio:'Desde $30.000',precioChico:'/ pack',color:'green'},
+    {emoji:'🐱',titulo:'Snacks y premiun',desc:'Golosinas y premios para consentir a tu mascota.',precio:'Por unidad',precioChico:'consultá',color:'pink'},
+    {emoji:'🛁',titulo:'Higiene y cuidado',desc:'Shampoo, peines y accesorios de aseo.',precio:'Consultá',precioChico:'variedad',color:'gold'},
+    {emoji:'🎾',titulo:'Juguetes',desc:'Pelotas, cuerdas y juguetes interactivos.',precio:'Desde $8.000',precioChico:'/ c/u',color:'orange'}
+  ],
+  comprar:[
+    {icono:'🛒',label:'Tienda online',sub:'Pedidos por WhatsApp',url:'#',color:'web'},
+    {icono:'',label:'Nosotros en MercadoLibre',sub:'Comprá con tu cuenta de MercadoLibre',url:'https://www.mercadolibre.com',color:'ml'},
+    {icono:'🛍️',label:'Mercado Shops',sub:'Nuestra tienda oficial',url:'https://mercadoshops.com/',color:'sh'}
+  ],
+  sociales:[
+    {label:'WhatsApp',sub:'Atendemos tus pedidos y consultas',url:'#',color:'wa'},
+    {label:'Instagram',sub:'@maxscotas.petshop',url:'#',color:'ig'},
+    {label:'Facebook',sub:'Maxscotas Petshop',url:'#',color:'fb'},
+    {label:'TikTok',sub:'Contenido de mascotas',url:'#',color:'tk'},
+    {label:'Email',sub:'contacto@maxscotas.com.ar',url:'mailto:contacto@maxscotas.com.ar',color:'mail'}
+  ],
+  footer:'Maxscotas Petshop · Con amor para tu mascota · Buenos Aires, Argentina'
+};
+let data=JSON.parse(JSON.stringify(DEFAULT));
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200);}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(data));toast('💾 Guardado');}catch(e){toast('⚠️ No se pudo guardar: '+(e&&e.message||'espacio lleno'));}}
+function load(){try{const raw=localStorage.getItem(LS_KEY);if(raw){const d=JSON.parse(raw);if(d&&d.nombre)data=d;}}catch(e){}}
+
+/* ---------- LOGIN ---------- */
+function login(){const v=$('pass').value.trim();const stored=localStorage.getItem(PASS_KEY);const expected=stored||DEFAULT_PASS;if(v===expected){if(!stored)localStorage.setItem(PASS_KEY,DEFAULT_PASS);$('login').classList.add('hide');$('panel').classList.remove('hide');toast('👋 Bienvenido');}else{$('login-err').textContent='Contraseña incorrecta.';}}
+$('btn-login').onclick=login;
+$('pass').addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+
+/* ---------- RENDER FORM ---------- */
+function colorOpt(sel,col){return `<option value="${col}" ${col===sel?'selected':''}>${col}</option>`;}
+function render(){
+  $('f-nombre').value=data.nombre;
+  $('f-avatar').value=data.avatar;
+  $('f-tagline').value=data.tagline;
+  // badges
+  $('badges').innerHTML=(data.badges&&data.badges.length?data.badges:['','','']).map((b,i)=>`<div><label>Etiqueta ${i+1}</label><input class="badge-input" data-i="${i}" value="${esc(b)}"></div>`).join('');
+  // promo
+  $('promo-toggle').innerHTML=[true,false].map(v=>`<button class="${data.promo.activa===v?'on':''}" data-v="${v}">${v?'Activa':'Oculta'}</button>`).join('');
+  $('promo-toggle').querySelectorAll('button').forEach(b=>b.onclick=()=>{data.promo.activa=b.dataset.v==='true';renderPromo();render();});
+  $('f-promo-titulo').value=data.promo.titulo;
+  $('f-promo-texto').value=data.promo.texto;
+  $('f-promo-big').value=data.promo.big;
+  // listas
+  renderProds();renderComprar();renderSoc();
+  $('f-footer').value=data.footer;
+}
+function renderPromo(){const top=$('promo-toggle');if(top)top.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===String(!!data.promo.activa)));}
+
+function prodHTML(p,i){
+  return `<div class="item"><h3>Producto ${i+1}</h3>
+    <div class="smallrow"><div><label>Emoji</label><input class="p-emoji" data-i="${i}" value="${esc(p.emoji)}" maxlength="8"></div>
+    <div><label>Nombre</label><input class="p-titulo" data-i="${i}" value="${esc(p.titulo)}"></div>
+    <div><label>Color fondo</label><select class="p-color" data-i="${i}">${['green','gold','orange','pink','violet','blue'].map(c=>colorOpt(p.color,c)).join('')}</select></div></div>
+    <div><label>Descripción</label><input class="p-desc" data-i="${i}" value="${esc(p.desc)}"></div>
+    <div class="smallrow2"><div><label>Precio</label><input class="p-precio" data-i="${i}" value="${esc(p.precio)}"></div>
+    <div><label>Aclaración (ej. "/ pack")</label><input class="p-chico" data-i="${i}" value="${esc(p.precioChico)}"></div></div>
+    <div class="btnrow"><button class="btn-del" data-i="${i}">🗑️ Quitar</button></div></div>`;
+}
+function compHTML(b,i){
+  return `<div class="item"><h3>Botón ${i+1}</h3>
+    <div class="smallrow"><div><label>Texto</label><input class="c-label" data-i="${i}" value="${esc(b.label)}"></div>
+    <div><label>Subtexto</label><input class="c-sub" data-i="${i}" value="${esc(b.sub)}"></div>
+    <div><label>Enlace (URL)</label><input class="c-url" data-i="${i}" value="${esc(b.url)}"></div></div>
+    <div class="smallrow"><div><label>Emoji</label><input class="c-icono" data-i="${i}" value="${esc(b.icono)}" maxlength="8" placeholder="dejá vacío para color base"></div>
+    <div><label>Color</label><select class="c-color" data-i="${i}">${COLORS.map(c=>colorOpt(b.color,c)).join('')}</select></div>
+    <div></div></div>
+    <div class="btnrow"><button class="btn-del" data-i="${i}">🗑️ Quitar</button></div></div>`;
+}
+function socHTML(b,i){
+  return `<div class="item"><h3>Red ${i+1}</h3>
+    <div class="smallrow"><div><label>Nombre (ej. WhatsApp)</label><input class="s-label" data-i="${i}" value="${esc(b.label)}"></div>
+    <div><label>Subtexto</label><input class="s-sub" data-i="${i}" value="${esc(b.sub)}"></div>
+    <div><label>Enlace</label><input class="s-url" data-i="${i}" value="${esc(b.url)}"></div></div>
+    <div class="smallrow"><div><label>Color</label><select class="s-color" data-i="${i}">${COLORS.map(c=>colorOpt(b.color,c)).join('')}</select></div><div></div><div></div></div>
+    <div class="btnrow"><button class="btn-del" data-i="${i}">🗑️ Quitar</button></div></div>`;
+}
+function renderProds(){$('prod-list').innerHTML=data.productos.map(prodHTML).join('');bindDeletes('prod-list','productos');bindInputs('prod-list','p-',['emoji','titulo','desc','precio','chico','color']);}
+function renderComprar(){$('comp-list').innerHTML=data.comprar.map(compHTML).join('');bindDeletes('comp-list','comprar');bindInputs('comp-list','c-',['label','sub','url','icono','color']);}
+function renderSoc(){$('soc-list').innerHTML=data.sociales.map(socHTML).join('');bindDeletes('soc-list','sociales');bindInputs('soc-list','s-',['label','sub','url','color']);}
+
+function bindDeletes(listId,key){document.querySelectorAll(`#${listId} .btn-del`).forEach(b=>b.onclick=()=>{data[key].splice(+b.dataset.i,1);render();toast('🗑️ Eliminado');});}
+function bindInputs(listId,cls,fields){
+  document.querySelectorAll(`#${listId} input, #${listId} select`).forEach(el=>{
+    const i=+el.dataset.i;const f=el.className.replace(cls,'');
+    if(!fields.includes(f))return;
+    el.addEventListener('input',()=>{data[listId==='prod-list'?'productos':listId==='comp-list'?'comprar':'sociales'][i][f]=el.value;});
+    el.addEventListener('change',()=>{data[listId==='prod-list'?'productos':listId==='comp-list'?'comprar':'sociales'][i][f]=el.value;});
+  });
+}
+
+/* add buttons */
+$('btn-add-prod').onclick=()=>{data.productos.push({emoji:'🐾',titulo:'Nuevo producto',desc:'Descripción',precio:'$0',precioChico:'',color:'green'});render();};
+$('btn-add-comp').onclick=()=>{data.comprar.push({icono:'🔗',label:'Nuevo botón',sub:'',url:'#',color:'web'});render();};
+$('btn-add-soc').onclick=()=>{data.sociales.push({label:'Nueva red',sub:'',url:'#',color:'wa'});render();};
+
+/* campos principales */
+['nombre','avatar','tagline','promo-titulo','promo-texto','promo-big','footer'].forEach(id=>{
+  $('f-'+id).addEventListener('input',e=>{
+    if(id.startsWith('promo-'))data.promo[id.replace('promo-','')]=e.target.value;
+    else if(id==='footer')data.footer=e.target.value;
+    else data[id.replace('f-','')]=e.target.value;
+  });
+});
+$('badges').addEventListener('input',e=>{
+  if(e.target.classList.contains('badge-input')){data.badges[+e.target.dataset.i]=e.target.value;}
+});
+
+/* acciones */
+$('btn-save').onclick=()=>{save();render();};
+$('btn-export').onclick=()=>{
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='respaldo-maxscotas.json';a.click();
+  toast('⬇️ Respaldo descargado');
+};
+$('btn-import').onclick=()=>$('file-import').click();
+$('file-import').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=()=>{
+    try{const d=JSON.parse(r.result);if(!d||!d.nombre||!d.productos)throw 0;data=d;save();render();toast('✅ Respaldo importado');}
+    catch(err){toast('❌ Archivo inválido');}
+  };r.readAsText(f);e.target.value='';
+});
+$('btn-pass').onclick=()=>{
+  const nueva=prompt('Nueva contraseña (mínimo 4 caracteres):');
+  if(nueva&&nueva.length>=4){localStorage.setItem(PASS_KEY,nueva);toast('🔑 Contraseña actualizada');}
+  else if(nueva)toast('❌ Muy corta');
+};
+
+load();render();
+if(localStorage.getItem(PASS_KEY)===DEFAULT_PASS||!localStorage.getItem(PASS_KEY)){
+  /* sin sesión persistida: pedimos clave siempre, pero si es la default entré directo la primera vez */
+}
+</script>
+</body>
+</html>
